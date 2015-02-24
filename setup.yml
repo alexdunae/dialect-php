@@ -1,0 +1,135 @@
+---
+# from https://github.com/jalefkowit/Vagrant-Ansible-Wordpress
+- hosts: vagrant
+  remote_user: vagrant
+  sudo: yes
+  tasks:
+    - name: Install unzip
+      apt: pkg=unzip state=latest update_cache=yes
+
+    - name: Install base packages
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - curl
+        - fail2ban
+        - git
+        - python-software-properties
+        - rsync
+        - ufw
+        - unattended-upgrades
+        - unzip
+        - vim-tiny
+
+    - name: Install MySQL
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - mysql-client
+        - mysql-server
+        - python-mysqldb
+
+    - name: Install PHP and modules
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - php5
+        - php-apc
+        - php-pear
+        - php5-cli
+        - php5-curl
+        - php5-gd
+        - php5-imagick
+        - php5-mcrypt
+        - php5-memcache
+        - php5-mysql
+        - php5-xmlrpc
+
+    - name: Install Apache
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - apache2
+        - libapache2-mod-php5
+
+    - name: Enable Apache modules
+      apache2_module: name={{ item }} state=present
+      with_items:
+        - deflate
+        - expires
+        - mime
+        - rewrite
+        - setenvif
+        - ssl
+
+    - name: Start MySQL service
+      service:
+        name: "mysql"
+        state: started
+        enabled: yes
+
+    - name: Setup MySQL root password
+      mysql_user:
+        name: "root"
+        password: "mysql"
+        host: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+    - name: Setup MySQL creds for root user
+      template:
+        src: "{{ mysqlTemplatePath }}"
+        dest: "/root/.my.cnf"
+        owner: "root"
+        mode: 0600
+
+    - name: Setup MySQL creds for vagrant user
+      template:
+        src: "{{ mysqlTemplatePath }}"
+        dest: "/home/vagrant/.my.cnf"
+        owner: "root"
+        mode: 0600
+
+    - name: Delete blank MySQL users
+      mysql_user:
+        name: ""
+        host: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+    - name: Drop MySQL test database
+      mysql_db: name=test state=absent
+
+
+    - name: Put "vagrant" user in www-data group
+      user:
+        name: "vagrant"
+        groups: "www-data"
+        append: yes
+
+    - name: Deactivate default vhost
+      command: a2dissite 000-default
+
+    - name: Ensure Apache is running
+      service: name=apache2 state=restarted enabled=yes
+
+    - name: Enable UWF
+      ufw: state=enabled policy=deny logging=on
+
+
+    - name: Open TCP ports
+      ufw: rule=allow port={{ item }} proto=tcp
+      with_items:
+      - 20
+      - 25
+      - 443
+      - 587
+      - 80
+      - 993
+
+    - name: Reload UFW
+      ufw: state=reloaded
