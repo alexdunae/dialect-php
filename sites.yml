@@ -1,0 +1,10 @@
+---
+defaults: &defaults
+  admin: false
+
+
+sites:
+  'bricksandmortar.in':
+    <<: *defaults
+    user: bricksandmortar
+    htroot: /var/www/bricksandmortar/bricksandmortar.in
