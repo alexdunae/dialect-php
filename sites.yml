@@ -12,3 +12,7 @@ sites:
     <<: *defaults
     user: yana
     htroot: /var/www/yana/yanacomoxvalley.ca
+  'valleychild.ca':
+    <<: *defaults
+    user: cvcda
+    htroot: /var/www/cvcda/valleychild.ca

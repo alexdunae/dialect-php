@@ -13,7 +13,7 @@ Vagrant.configure('2') do |config|
     ansible.inventory_path = 'vagrant-inventory'
     ansible.host_key_checking = 'false'
     ansible.limit = 'all'
-    ansible.tags = %w(firewall) # sites php
+    ansible.tags = %w(sites) # firewall sites php
   end
 
   config.vm.provider 'virtualbox' do |v|
