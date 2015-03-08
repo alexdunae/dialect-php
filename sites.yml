@@ -8,3 +8,7 @@ sites:
     <<: *defaults
     user: bricksandmortar
     htroot: /var/www/bricksandmortar/bricksandmortar.in
+  'yanacomoxvalley.ca':
+    <<: *defaults
+    user: yana
+    htroot: /var/www/yana/yanacomoxvalley.ca
