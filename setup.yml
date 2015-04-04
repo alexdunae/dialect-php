@@ -1,7 +1,7 @@
 ---
 # from https://github.com/jalefkowit/Vagrant-Ansible-Wordpress
-- hosts: vagrant
-  remote_user: vagrant
+- hosts: diacritic
+  remote_user: dialect
   sudo: yes
   vars_files:
     - sites.yml
@@ -50,6 +50,7 @@
         - deflate
         - expires
         - mime
+        - headers
         - rewrite
         - setenvif
         - ssl
@@ -119,6 +120,7 @@
       with_dict: sites
       tags:
         - sites
+        - users
 
     - name: Add users
       user:
@@ -130,6 +132,7 @@
       with_dict: sites
       tags:
         - sites
+        - users
 
     - name: create authorized_keys
       authorized_key:
@@ -139,6 +142,7 @@
       with_dict: sites
       tags:
         - sites
+        - users
 
     - name: Add user hosting paths
       file:
@@ -151,6 +155,7 @@
       with_dict: sites
       tags:
         - sites
+        - users
 
     - name: Deactivate default vhost
       command: a2dissite 000-default
